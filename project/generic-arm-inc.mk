@@ -27,10 +27,6 @@ TARGET := generic-arm64
 ifeq (false,$(call TOBOOL,$(KERNEL_32BIT)))
 
 # Arm64 address space configuration
-KERNEL_ASPACE_BASE := 0xffffffff80000000
-KERNEL_ASPACE_SIZE := 0x0000000080000000
-KERNEL_BASE        := 0xffffffff80000000
-
 USER_ASPACE_BASE   := 0x0000000000008000
 
 ifeq (false,$(call TOBOOL,$(USER_32BIT)))
@@ -40,6 +36,8 @@ else
 USER_ASPACE_SIZE   := 0x00000000ffff8000
 GLOBAL_DEFINES += MMU_USER_SIZE_SHIFT=32
 endif
+
+KERNEL_BASE_ASLR   ?= true
 
 else
 
