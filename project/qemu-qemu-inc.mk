@@ -72,7 +72,8 @@ $(QEMU_MAKEFILE):
 	# some hosts compiler will complain about stringop truncation.
 	cd $(QEMU_BUILD_BASE) && $(abspath $(QEMU_ROOT)/configure) \
 		--target-list=$(QEMU_TARGET) --with-git=true --disable-werror \
-		--disable-gcrypt --disable-vnc-png $(QEMU_AOSP_DISABLES)
+		--disable-gcrypt --disable-vnc-png $(QEMU_AOSP_DISABLES) \
+		--python=$(BUILDTOOLS_BINDIR)/py3-cmd
 
 $(QEMU_BIN): QEMU_BUILD_BASE:=$(QEMU_BUILD_BASE)
 $(QEMU_BIN): $(QEMU_MAKEFILE) .PHONY

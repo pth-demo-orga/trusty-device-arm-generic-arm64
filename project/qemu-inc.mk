@@ -91,6 +91,7 @@ QEMU_CONFIG := $(BUILDDIR)/config.json
 QEMU_PY := $(BUILDDIR)/qemu.py
 QEMU_ERROR_PY := $(BUILDDIR)/qemu_error.py
 QEMU_OPTIONS_PY := $(BUILDDIR)/qemu_options.py
+PY3_CMD := $(BUILDDIR)/py3-cmd
 
 $(ATF_OUT_DIR):
 	mkdir -p $@
@@ -142,6 +143,16 @@ $(QEMU_ERROR_PY): $(PROJECT_QEMU_INC_LOCAL_DIR)/qemu/qemu_error.py
 $(QEMU_OPTIONS_PY): $(PROJECT_QEMU_INC_LOCAL_DIR)/qemu/qemu_arm64_options.py
 	@echo copying $@
 	@cp $< $@
+
+# Copy prebuilt hermetic Python 3 command into the build directory so that the
+# build does not rely on the host having Python 3 installed. Hermetic python 3
+# contains the standard library so this is all we need to run the qemu scripts
+$(PY3_CMD): $(BUILDTOOLS_BINDIR)/py3-cmd
+	@echo copying $@
+	@$(MKDIR)
+	@cp $< $@
+
+EXTRA_BUILDDEPS += $(PY3_CMD)
 
 # Copy Android prebuilts into the build directory so that the build does not
 # depend on any files in the source tree. We want to package the build artifacts
@@ -195,11 +206,12 @@ EXTRA_BUILDDEPS += $(RUN_QEMU_SCRIPT)
 # $(RUN_SCRIPT) will be the device-generic interface called by run-tests
 $(RUN_SCRIPT): QEMU_PY := $(subst $(BUILDDIR)/,,$(QEMU_PY))
 $(RUN_SCRIPT): QEMU_CONFIG := $(subst $(BUILDDIR)/,,$(QEMU_CONFIG))
+$(RUN_SCRIPT): PY3_CMD := $(subst $(BUILDDIR)/,,$(PY3_CMD))
 $(RUN_SCRIPT): $(QEMU_SCRIPTS) $(QEMU_CONFIG)
 	@echo generating $@
 	@echo "#!/bin/sh" >$@
 	@echo 'SCRIPT_DIR=$$(dirname "$$0")' >>$@
-	@echo 'python3 "$$SCRIPT_DIR/$(QEMU_PY)" -c "$$SCRIPT_DIR/$(QEMU_CONFIG)" "$$@"' >>$@
+	@echo '$$SCRIPT_DIR/$(PY3_CMD) "$$SCRIPT_DIR/$(QEMU_PY)" -c "$$SCRIPT_DIR/$(QEMU_CONFIG)" "$$@"' >>$@
 	@chmod +x $@
 
 EXTRA_BUILDDEPS += $(RUN_SCRIPT)
@@ -217,7 +229,7 @@ ifeq (true,$(call TOBOOL,$(PACKAGE_QEMU_TRUSTY)))
 
 # Files & directories to copy into QEMU package archive
 QEMU_PACKAGE_FILES := \
-	$(OUTBIN) $(QEMU_SCRIPTS) $(QEMU_CONFIG) $(RPMB_DEV) \
+	$(OUTBIN) $(QEMU_SCRIPTS) $(PY3_CMD) $(QEMU_CONFIG) $(RPMB_DEV) \
 	$(RUN_SCRIPT) $(RUN_QEMU_SCRIPT) $(STOP_SCRIPT) $(ANDROID_PREBUILT) \
 	$(QEMU_BIN) $(ATF_SYMLINKS) $(ATF_OUT_DIR)/bl31.bin \
 	$(ATF_OUT_DIR)/RPMB_DATA $(ATF_OUT_COPIED_FILES) $(LINUX_IMAGE) \
@@ -250,3 +262,4 @@ QEMU_ERROR_PY :=
 QEMU_OPTIONS_PY :=
 QEMU_PY :=
 QEMU_SCRIPTS :=
+PY3_CMD :=
