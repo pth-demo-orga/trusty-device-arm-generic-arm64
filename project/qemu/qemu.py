@@ -127,10 +127,14 @@ class QEMUCommandPipe(object):
     def close(self):
         """Close and clean up command pipes."""
 
-        if self.com_pipe_in:
-            self.com_pipe_in.close()
-        if self.com_pipe_out:
-            self.com_pipe_out.close()
+        def try_close(pipe):
+            try:
+                self.com_pipe_in.close()
+            except IOError as e:
+                print("close error ignored", e)
+
+        try_close(self.com_pipe_in)
+        try_close(self.com_pipe_out)
 
         # Onerror callback function to handle errors when we try to remove
         # command pipe directory, since we sleep one second if QEMU doesn't
