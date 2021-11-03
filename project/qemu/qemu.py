@@ -413,7 +413,11 @@ c
             sys.stderr.write("Connection has not been established yet!")
 
     def msg_channel_recv(self):
-        return self.msg_sock_conn.recv(64)
+        if self.msg_sock_conn:
+            return self.msg_sock_conn.recv(64)
+        else:
+            # error cases: channel not yet initialized or channel torn down
+            return bytes()
 
     def msg_channel_close(self):
         if self.msg_sock_conn:
