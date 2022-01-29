@@ -77,9 +77,6 @@ GLOBAL_DEFINES += WITH_NO_PHYS_RELOCATION=1
 # limit heap grows
 GLOBAL_DEFINES += HEAP_GROW_SIZE=8192
 
-# limit physical memory to 38 bit to prevert tt_trampiline from getting larger than arm64_kernel_translation_table
-GLOBAL_DEFINES += MMU_IDENT_SIZE_SHIFT=38
-
 # enable LTO in user-tasks modules
 USER_LTO_ENABLED ?= true
 

@@ -19,6 +19,11 @@ APPLOADER_ALLOW_NS_CONNECT := true
 
 include project/$(QEMU_TRUSTY_PROJECT).mk
 
+# limit physical memory to 29 bits to make the mapping
+# as small as possible while covering the entire kernel plus
+# enough pages for the page tables for the initial mappings
+GLOBAL_DEFINES += MMU_IDENT_SIZE_SHIFT=29
+
 # Derive RPMB key using HKDF
 WITH_HKDF_RPMB_KEY ?= true
 
